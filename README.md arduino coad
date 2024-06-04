@@ -1,0 +1,149 @@
+# Plant-waatering-System
+
+#include <ESP8266WiFi.h>
+#include <FirebaseESP8266.h>
+#include <FS.h>
+#include <SD.h>
+
+#define WIFI_SSID "Wimalagiri"
+#define WIFI_PASSWORD "Wimalagiri4114"
+
+// Firebase configuration
+FirebaseConfig config;
+FirebaseAuth auth;
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+
+  // Set Firebase host and auth
+  config.host = "https://switch-6debc-default-rtdb.firebaseio.com";
+  config.signer.tokens.legacy_token = "Mwg4BL9bH6Xy4o2AhAsuxZg8ty1s28N6bF6RP4DF";
+
+  Firebase.begin(&config, &auth);
+
+  if (!SD.begin(4)) {
+    Serial.println("Initialization failed!");
+    return;
+  }
+  Serial.println("Initialization done.");
+}
+
+void loop() {
+  // Your code to interact with Firebase and SD card
+}
+
+
+
+/////flutter code
+
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+void main () async{
+   WidgetsFlutterBinding.ensureInitialized();
+   await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey:"AIzaSyCAfkegbJv010acHcknO6BUt22BLlphx0M",
+      appId: "1:186068825309:android:ce2f372c31b3b88d955734",
+      messagingSenderId: "186068825309",
+      projectId: "switch-6debc",
+      databaseURL: "https://switch-6debc-default-rtdb.firebaseio.com/")
+    );
+  
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool b1 = false;
+  bool b2 = false;
+
+  final dbR = FirebaseDatabase.instance.ref(); 
+  
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 160, 214, 160),
+          centerTitle: true,
+          title: const Text(
+            "Watering System ",
+            style: TextStyle(color: Color.fromARGB(255, 33, 33, 31), fontSize: 20),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  b1
+                      ? const Icon(
+                          Icons.switch_left_rounded,
+                          size: 50,
+                          color: Colors.purple,
+                        )
+                      : const Icon(
+                          Icons.switch_right_rounded,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        dbR.child("light5").set(!b1);
+                        b1 = !b1;
+                      });
+                    },
+                    child: b1 ? const Text("Watering is Start") : const Text("Watering is Finished!"),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  b2
+                      ? const Icon(
+                          Icons.lightbulb,
+                          size: 50,
+                          color: Colors.purple,
+                        )
+                      : const Icon(
+                          Icons.lightbulb,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        dbR.child("light6").set(!b2);
+                        b2 = !b2;
+                      });
+                    },
+                    child: b2 ? const Text("On Water") : const Text("Off"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
